@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  goapp:
+    build: .
+    volumes:
+      - .:/go/app
+    platform: linux/amd64
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    ports:
+    - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: products
+      MYSQL_PASSWORD: root
+    extras_hosts:
+      - "host.docker.internal:172.17.0.1"
+
+    zookeeper:
+      image: confluentinc/cp-zookeeper:7.3.0
+      hostname: zookeeper
+      container_name: zookeeper
+      ports:
+        - "2181:2181"
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_TICK_TIME: 2000
+
+    kafka:
+      image: confluentic/cp-server:7.3.0
+      hostname: kafka
+      container_name: kafka
+      depends_on:
+        - zookeeper
+      ports:
+        - "9092:9092"
+        - "9094:9094"
+      environment:
+        KAFKA_BROKER_ID: 1
+      
+
+
